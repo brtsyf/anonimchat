@@ -47,9 +47,12 @@ io.on("connection", (socket) => {
       room: room,
     });
   });
-  socket.on("join room", (room, username) => {
+  socket.on("join room", (room) => {
     socket.join(room);
-    console.log(room, username);
+    console.log(room);
+    socket.broadcast.to(room).emit("user joined", {
+      user: socket.id,
+    });
   });
 
   // Handle disconnection

@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Anonymous Chat Room</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
@@ -14,28 +17,36 @@
         padding: 0;
         box-sizing: border-box;
         font-family: "Poppins", sans-serif;
+        -webkit-tap-highlight-color: transparent;
       }
 
       body {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         height: 100vh;
+        height: 100dvh; /* Dynamic viewport height for mobile */
         display: flex;
         flex-direction: column;
+        overflow: hidden;
       }
 
       .header {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
-        padding: 1.2rem;
+        padding: 1rem;
         text-align: center;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         position: relative;
+        z-index: 10;
       }
 
       .header h2 {
         color: #2d3748;
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         font-weight: 600;
+        padding: 0 2.5rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .back-button {
@@ -46,34 +57,46 @@
         background: none;
         border: none;
         color: #2d3748;
-        font-size: 1.2rem;
+        font-size: 1.5rem;
         cursor: pointer;
         padding: 0.5rem;
         transition: transform 0.2s ease;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
       }
 
       .back-button:hover {
-        transform: translateY(-50%) scale(1.1);
+        background: rgba(0, 0, 0, 0.05);
+      }
+
+      .back-button:active {
+        transform: translateY(-50%) scale(0.95);
       }
 
       .chat-container {
         flex: 1;
-        padding: 1.5rem;
+        padding: 1rem;
         overflow-y: auto;
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.8rem;
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(5px);
+        -webkit-overflow-scrolling: touch;
       }
 
       .message {
-        padding: 1rem 1.2rem;
+        padding: 0.8rem 1rem;
         border-radius: 1.2rem;
-        max-width: 70%;
+        max-width: 85%;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         position: relative;
         animation: messageAppear 0.3s ease;
+        word-break: break-word;
       }
 
       @keyframes messageAppear {
@@ -101,29 +124,33 @@
       }
 
       .message .user {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         opacity: 0.7;
-        margin-bottom: 0.3rem;
+        margin-bottom: 0.2rem;
       }
 
       .input-container {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
-        padding: 1.2rem;
+        padding: 0.8rem;
         display: flex;
-        gap: 1rem;
+        gap: 0.8rem;
         box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 10;
       }
 
       #message {
         flex: 1;
-        padding: 1rem 1.5rem;
+        padding: 0.8rem 1.2rem;
         border: 2px solid #e2e8f0;
         border-radius: 1.5rem;
         outline: none;
         font-size: 1rem;
         transition: border-color 0.3s ease;
         background: white;
+        -webkit-appearance: none;
+        appearance: none;
       }
 
       #message:focus {
@@ -134,14 +161,17 @@
         background: #667eea;
         color: white;
         border: none;
-        padding: 1rem 2rem;
-        border-radius: 1.5rem;
+        padding: 0.8rem;
+        border-radius: 50%;
         cursor: pointer;
         font-weight: 500;
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        flex-shrink: 0;
       }
 
       button:hover {
@@ -150,18 +180,18 @@
       }
 
       button:active {
-        transform: translateY(0);
+        transform: translateY(0) scale(0.95);
       }
 
       .send-icon {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
         fill: currentColor;
       }
 
       /* Scrollbar styling */
       ::-webkit-scrollbar {
-        width: 8px;
+        width: 6px;
       }
 
       ::-webkit-scrollbar-track {
@@ -170,36 +200,69 @@
 
       ::-webkit-scrollbar-thumb {
         background: rgba(102, 126, 234, 0.5);
-        border-radius: 4px;
+        border-radius: 3px;
       }
 
       ::-webkit-scrollbar-thumb:hover {
         background: rgba(102, 126, 234, 0.7);
       }
 
+      /* Mobile optimizations */
       @media (max-width: 768px) {
         .header {
-          padding: 1rem;
+          padding: 0.8rem;
         }
 
         .header h2 {
-          font-size: 1.2rem;
+          font-size: 1.1rem;
         }
 
         .message {
-          max-width: 85%;
+          max-width: 90%;
+          padding: 0.7rem 0.9rem;
         }
 
         .input-container {
-          padding: 1rem;
+          padding: 0.7rem;
+        }
+
+        #message {
+          padding: 0.7rem 1rem;
+          font-size: 0.95rem;
         }
 
         button {
-          padding: 1rem;
+          width: 40px;
+          height: 40px;
+          padding: 0.7rem;
         }
 
-        button span {
-          display: none;
+        .send-icon {
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      /* Prevent zoom on input focus for iOS */
+      @supports (-webkit-touch-callout: none) {
+        input,
+        textarea {
+          font-size: 16px !important;
+        }
+      }
+
+      /* Safe area insets for modern mobile browsers */
+      @supports (padding: max(0px)) {
+        .header {
+          padding-top: max(1rem, env(safe-area-inset-top));
+          padding-left: max(1rem, env(safe-area-inset-left));
+          padding-right: max(1rem, env(safe-area-inset-right));
+        }
+
+        .input-container {
+          padding-bottom: max(0.8rem, env(safe-area-inset-bottom));
+          padding-left: max(0.8rem, env(safe-area-inset-left));
+          padding-right: max(0.8rem, env(safe-area-inset-right));
         }
       }
     </style>
@@ -216,7 +279,6 @@
         <svg class="send-icon" viewBox="0 0 24 24">
           <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
         </svg>
-        <span>Send</span>
       </button>
     </div>
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
@@ -230,6 +292,17 @@
       const socket = io();
       socket.emit("join room", room);
 
+      // Prevent scrolling on body when keyboard is open on mobile
+      document.body.addEventListener(
+        "touchmove",
+        function (e) {
+          if (e.target.tagName === "INPUT") {
+            e.preventDefault();
+          }
+        },
+        { passive: false }
+      );
+
       socket.on("chat message", (data) => {
         const messageDiv = document.createElement("div");
         const userSpan = document.createElement("div");
@@ -241,6 +314,14 @@
 
         messageDiv.appendChild(userSpan);
         messageDiv.appendChild(messageContent);
+        messageDiv.className = "message received";
+        document.getElementById("messages").appendChild(messageDiv);
+        messageDiv.scrollIntoView({ behavior: "smooth" });
+      });
+
+      socket.on("user joined", (data) => {
+        const messageDiv = document.createElement("div");
+        messageDiv.textContent = `${data.user} joined the room`;
         messageDiv.className = "message received";
         document.getElementById("messages").appendChild(messageDiv);
         messageDiv.scrollIntoView({ behavior: "smooth" });
@@ -271,6 +352,16 @@
 
       // Auto focus message input
       document.getElementById("message").focus();
+
+      // Handle virtual keyboard on mobile
+      const input = document.getElementById("message");
+      const chatContainer = document.getElementById("messages");
+
+      input.addEventListener("focus", () => {
+        setTimeout(() => {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 300);
+      });
     </script>
   </body>
 </html>
