@@ -49,12 +49,34 @@ io.on("connection", (socket) => {
   });
   socket.on("join room", (room) => {
     socket.join(room);
-    console.log(room);
     socket.broadcast.to(room).emit("user joined", {
       user: socket.id,
     });
+    io.to(room).emit("room status", {
+      userCount: io.sockets.adapter.rooms.get(room).size,
+    });
   });
+  socket.on("leave room", (room) => {
+    socket.leave(room);
+    io.to(room).emit("chat message", {
+      user: socket.id,
+      message: "left the room",
+      room: room,
+    });
 
+    // Get the room size safely
+    const roomSize = io.sockets.adapter.rooms.get(room)?.size || 0;
+
+    socket.broadcast.to(room).emit("room status", {
+      userCount: roomSize,
+    });
+
+    // If room is empty, remove it from roomlist
+    if (roomSize === 0) {
+      roomlist.delete(room);
+      io.emit("roomlist", Array.from(roomlist));
+    }
+  });
   // Handle disconnection
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);

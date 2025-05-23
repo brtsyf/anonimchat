@@ -269,7 +269,7 @@
   </head>
   <body>
     <div class="header">
-      <button class="back-button" onclick="window.location.href='/'">←</button>
+      <button class="back-button" onclick="leaveRoom()">←</button>
       <h2 id="room"></h2>
     </div>
     <div id="messages" class="chat-container"></div>
@@ -291,6 +291,16 @@
       document.getElementById("room").innerHTML = `Room: ${room}`;
       const socket = io();
       socket.emit("join room", room);
+
+      function leaveRoom() {
+        socket.emit("leave room", room);
+        window.location.href = "/";
+      }
+
+      // Handle page unload
+      window.addEventListener("beforeunload", () => {
+        socket.emit("leave room", room);
+      });
 
       // Prevent scrolling on body when keyboard is open on mobile
       document.body.addEventListener(
@@ -361,6 +371,12 @@
         setTimeout(() => {
           chatContainer.scrollTop = chatContainer.scrollHeight;
         }, 300);
+      });
+
+      socket.on("room status", (data) => {
+        document.getElementById(
+          "room"
+        ).innerHTML = `Room: ${room} (${data.userCount} users)`;
       });
     </script>
   </body>
