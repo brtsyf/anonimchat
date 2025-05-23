@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Chat Room</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 900px;
+      }
+
+      h1 {
+        color: #2d3748;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: 600;
+      }
+
+      .status {
+        padding: 12px 20px;
+        margin: 15px 0;
+        border-radius: 12px;
+        background: #e8f5e9;
+        color: #2d3748;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .user-list {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 15px;
+        margin: 20px 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      .user-list h2 {
+        color: #2d3748;
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+        font-weight: 500;
+      }
+
+      .user-item {
+        padding: 12px 15px;
+        margin: 8px 0;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s ease;
+      }
+
+      .user-item:hover {
+        transform: translateX(5px);
+      }
+
+      .user-item::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background: #4caf50;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+
+      .chat-container {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 15px;
+        margin-top: 20px;
+      }
+
+      .room-controls {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      #roomSelect {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        color: #2d3748;
+        background: white;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+      }
+
+      #roomSelect:focus {
+        border-color: #667eea;
+        outline: none;
+      }
+
+      button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #667eea;
+        color: white;
+      }
+
+      button:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 20px;
+        }
+
+        .room-controls {
+          flex-direction: column;
+        }
+
+        button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>✨ Anonymous Chat Room</h1>
+      <div id="status" class="status">Connecting...</div>
+      <div id="userList" class="user-list">
+        <h2>👥 Connected Users</h2>
+        <div id="users"></div>
+      </div>
+      <div class="chat-container">
+        <div class="room-controls">
+          <select id="roomSelect">
+            <option value="">Select a room</option>
+          </select>
+          <button onclick="createRoom()">Create New Room</button>
+          <button onclick="joinRoom()">Join Room</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+      const socket = io();
+      const statusDiv = document.getElementById("status");
+      const usersDiv = document.getElementById("users");
+      const connectedUsers = new Set();
+      const roomSelect = document.getElementById("roomSelect");
+      // Connection status handling
+      socket.on("connect", () => {
+        statusDiv.textContent = `Connected (Your ID: ${socket.id})`;
+        statusDiv.style.backgroundColor = "#e8f5e9";
+        addUser(socket.id);
+      });
+
+      socket.on("disconnect", () => {
+        statusDiv.textContent = "Disconnected";
+        statusDiv.style.backgroundColor = "#ffebee";
+        clearUsers();
+      });
+
+      // Handle user list updates
+      socket.on("users", (users) => {
+        clearUsers();
+        users.forEach((id) => addUser(id));
+      });
+      socket.on("roomlist", (rooms) => {
+        rooms.forEach((room) => {
+          const option = document.querySelector("#roomSelect");
+          option.appendChild(new Option(room, room));
+        });
+      });
+
+      function createRoom() {
+        socket.emit("create room");
+      }
+      function joinRoom() {
+        socket.emit("join room", roomSelect.value);
+        window.location.href = "/chat?room=" + roomSelect.value;
+      }
+
+      function addUser(id) {
+        if (!connectedUsers.has(id)) {
+          connectedUsers.add(id);
+          const userDiv = document.createElement("div");
+          userDiv.id = `user-${id}`;
+          userDiv.className = "user-item";
+          userDiv.textContent = `User: ${id}`;
+          usersDiv.appendChild(userDiv);
+        }
+      }
+
+      function removeUser(id) {
+        connectedUsers.delete(id);
+        const userElement = document.getElementById(`user-${id}`);
+        if (userElement) {
+          userElement.remove();
+        }
+      }
+
+      function clearUsers() {
+        connectedUsers.clear();
+        usersDiv.innerHTML = "";
+      }
+    </script>
+  </body>
+</html>
